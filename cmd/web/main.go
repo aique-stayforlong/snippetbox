@@ -7,13 +7,21 @@ import (
 	"os"
 )
 
+// dependency injection container
+type application struct {
+	logger *slog.Logger
+}
+
 func main() {
 	// define command line flags
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	// parse command line flags
 	flag.Parse()
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	// init dependency injection container
+	app := application{
+		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
+	}
 
 	mux := http.NewServeMux()
 
@@ -25,16 +33,16 @@ func main() {
 	mux.Handle("GET /static/", filePath)
 
 	// regular http routes
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
+	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
+	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
-	logger.Info("starting server", slog.String("addr", *addr))
+	app.logger.Info("starting server", slog.String("addr", *addr))
 
 	err := http.ListenAndServe(*addr, mux)
 	if err != nil {
-		logger.Error(err.Error())
+		app.logger.Error(err.Error())
 		os.Exit(1)
 	}
 }
