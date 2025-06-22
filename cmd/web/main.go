@@ -7,11 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"snippetbox.asuarez.net/internal/repository"
 )
 
 // dependency injection container
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *repository.SnippetRepository
 }
 
 func main() {
@@ -36,7 +38,8 @@ func main() {
 
 	// init dependency injection container
 	app := application{
-		logger: logger,
+		logger:   logger,
+		snippets: &repository.SnippetRepository{DB: db},
 	}
 
 	// init logger dependency
