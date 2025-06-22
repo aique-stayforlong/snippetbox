@@ -63,3 +63,11 @@ Para crear un `index.html` en todos los subdirectorios de una ruta, se puede uti
 ```bash
 $ find {ruta} -type d -exec touch {}/index.html \;
 ```
+
+## Comandos importantes
+
+### Dependencias
+
+- `go get {dependencia}` - Instala una nueva dependencia.
+- `go mod verify` - Verifica que las dependencias descargadas corresponden con las versiones requeridas.
+- `go mod tidy` - Elimina todas aquellas dependencias a las que no se está haciendo referencia en código.
