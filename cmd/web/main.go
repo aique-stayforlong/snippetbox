@@ -23,24 +23,14 @@ func main() {
 		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
 	}
 
-	mux := http.NewServeMux()
-
-	// static files server
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	// removes /static prefix to get the file path
-	filePath := http.StripPrefix("/static", fileServer)
-	// returns the static file
-	mux.Handle("GET /static/", filePath)
-
-	// regular http routes
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
-	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
-	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
-
+	// init logger dependency
 	app.logger.Info("starting server", slog.String("addr", *addr))
 
-	err := http.ListenAndServe(*addr, mux)
+	// set server routes
+	routes := app.routes()
+
+	// start server
+	err := http.ListenAndServe(*addr, routes)
 	if err != nil {
 		app.logger.Error(err.Error())
 		os.Exit(1)
