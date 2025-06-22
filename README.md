@@ -3,6 +3,22 @@
 Ejemplo práctico y pequeños apuntes tomados durante el seguimiento del libro [Let's GO de Alex Edwards](https://lets-go-further.alexedwards.net/) para
 aprender programación Web en este lenguaje.
 
+## Arrancar la aplicación
+
+La aplicación se arranca con el comando:
+
+```bash
+go run ./cmd/web -addr=":4000"
+```
+
+Las command-line flags son opcionales.
+
+Se podrá consultar la ayuda del comando de arranque mediante:
+
+```bash
+go run ./cmd/web -help
+```
+
 ## Servemux
 
 ### Configuración por defecto
