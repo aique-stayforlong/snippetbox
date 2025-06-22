@@ -29,3 +29,21 @@ ruta más restrictiva es la que tiene mayor prioridad.
 
 La carpeta denominada `internal` tiene un especial comportamiento en las aplicaciones GO. Tan sólo es accesible desde la
 carpeta padre, sin importar la visibilidad que posean los ficheros que se encuentran dentro de ella.
+
+## FileServer
+
+Esta herramienta, además de permitir servir los ficheros estáticos de la web, proporciona otras utilidades como el
+escapado de rutas URL.
+
+En cuanto al rendimiento, esta herramienta servirá los ficheros directamente de la RAM, evitando los lentos accesos a
+disco.
+
+Si se quiere evitar que esta herramienta permita acceder a los directorios, será necesario incluir un fichero
+`index.html` en blanco. De esta forma, al acceder a un directorio se servirá ese fichero en lugar de mostrar la
+estructura de directorios.
+
+Para crear un `index.html` en todos los subdirectorios de una ruta, se puede utilizar el comando:
+
+```bash
+$ find {ruta} -type d -exec touch {}/index.html \;
+```
