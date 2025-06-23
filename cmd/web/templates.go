@@ -22,11 +22,13 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	}
 }
 
+// custom template function
 func humanDate(t time.Time) string {
 	return t.Format("02 Jan 2006 at 15:04")
 }
 
-var functions = template.FuncMap{
+// custom template function collection
+var customTemplateFunctions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
@@ -41,8 +43,8 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		// parse the base file
-		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.tmpl.html")
+		// parse the base file and add the custom template functions
+		ts, err := template.New(name).Funcs(customTemplateFunctions).ParseFiles("./ui/html/base.tmpl.html")
 		if err != nil {
 			return nil, err
 		}
