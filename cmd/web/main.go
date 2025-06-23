@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,8 +14,9 @@ import (
 
 // dependency injection container
 type application struct {
-	logger   *slog.Logger
-	snippets *repository.SnippetRepository
+	logger        *slog.Logger
+	snippets      *repository.SnippetRepository
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -25,6 +27,13 @@ func main() {
 	flag.Parse() // get command line flags
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	// create template file sets for each page
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
 	// database connection
 	dsn := flag.String("dsn", fmt.Sprintf("web:pass@tcp(127.0.0.1:%s)/snippetbox?parseTime=true", *port), "MySQL data source name")
@@ -39,8 +48,9 @@ func main() {
 
 	// init dependency injection container
 	app := application{
-		logger:   logger,
-		snippets: &repository.SnippetRepository{DB: db},
+		logger:        logger,
+		snippets:      &repository.SnippetRepository{DB: db},
+		templateCache: templateCache,
 	}
 
 	// init logger dependency

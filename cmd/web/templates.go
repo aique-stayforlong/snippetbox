@@ -1,8 +1,65 @@
 package main
 
-import "snippetbox.asuarez.net/internal/repository"
+import (
+	"fmt"
+	"html/template"
+	"net/http"
+	"path/filepath"
+	"snippetbox.asuarez.net/internal/repository"
+)
 
 type templateData struct {
 	Snippet  repository.Snippet
 	Snippets []repository.Snippet
+}
+
+func newTemplateCache() (map[string]*template.Template, error) {
+	cache := map[string]*template.Template{}
+
+	pages, err := filepath.Glob("./ui/html/pages/*.tmpl.html")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, page := range pages {
+		name := filepath.Base(page)
+
+		// parse the base file
+		ts, err := template.ParseFiles("./ui/html/base.tmpl.html")
+		if err != nil {
+			return nil, err
+		}
+
+		// parse any partials file
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl.html")
+		if err != nil {
+			return nil, err
+		}
+
+		// parse current page template
+		ts, err = ts.ParseFiles(page)
+		if err != nil {
+			return nil, err
+		}
+
+		cache[name] = ts // add the template set to the map
+	}
+
+	return cache, nil
+}
+
+func (app *application) render(w http.ResponseWriter, r *http.Request, status int, page string, data templateData) {
+	ts, ok := app.templateCache[page]
+	if !ok {
+		err := fmt.Errorf("the template %s does not exist", page)
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(status)
+
+	err := ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
