@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log/slog"
 	"net/http"
@@ -19,13 +20,14 @@ type application struct {
 func main() {
 	// define command line flags
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	// parse command line flags
-	flag.Parse()
+	port := flag.String("port", "3308", "Database port")
+
+	flag.Parse() // get command line flags
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	// database connection
-	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", fmt.Sprintf("web:pass@tcp(127.0.0.1:%s)/snippetbox?parseTime=true", *port), "MySQL data source name")
 
 	db, err := openDB(*dsn)
 	if err != nil {
@@ -33,8 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// closes database right before exit
-	defer db.Close()
+	defer db.Close() // closes database right before exit
 
 	// init dependency injection container
 	app := application{
@@ -45,8 +46,7 @@ func main() {
 	// init logger dependency
 	app.logger.Info("starting server", slog.String("addr", *addr))
 
-	// set server routes
-	routes := app.routes()
+	routes := app.routes() // set server routes
 
 	// start server
 	err = http.ListenAndServe(*addr, routes)
