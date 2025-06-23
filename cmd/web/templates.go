@@ -7,11 +7,19 @@ import (
 	"net/http"
 	"path/filepath"
 	"snippetbox.asuarez.net/internal/repository"
+	"time"
 )
 
 type templateData struct {
-	Snippet  repository.Snippet
-	Snippets []repository.Snippet
+	CurrentYear int
+	Snippet     repository.Snippet
+	Snippets    []repository.Snippet
+}
+
+func (app *application) newTemplateData(r *http.Request) templateData {
+	return templateData{
+		CurrentYear: time.Now().Year(),
+	}
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
